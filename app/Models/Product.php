@@ -16,8 +16,6 @@ class Product extends Model
         'sku',
         'cat',
         'stock',
-        'old_price',
-        'new_price',
         'status'
     ];
 

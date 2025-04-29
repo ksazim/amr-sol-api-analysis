@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Product;
 use App\Models\ProductPrice;
 
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+
 class ProductController extends Controller
 {
     public function list()
@@ -27,32 +31,127 @@ class ProductController extends Controller
         }
     }
 
-    public function craete()
+    public function create(Request $request)
     {
-        $productImage = '';
+        // Validation 
+        $validate = Validator::make($request->all(), [
+            'name'        => 'required',
+            'description' => 'required',
+            'stock'       => 'required',
+            'status'      => 'required'
+        ]);
 
-        if($request->hasFile('photo')) {
-            $productImage = $this->handleFile($request->photo);
+        if($validate->fails()) {
+           return response()->json([
+            'status' => 400,
+            'errors' => $validate->errors()
+           ]);
         }
 
+        try {
+            $prd_img = '';
+            if($request->hasFile('prd_img')) {
+               $prd_img = $this->handleFile($request->prd_img);
+            }
 
+            Product::create([
+                'name'        => $request->name,
+                'description' => $request->description,
+                'prd_img'     => $prd_img,
+                'sku'         => $this->generateSKU(),
+                'cat'         => $request->cat,
+                'stock'       => $request->stock,
+                'status'      => $request->status
+            ]);
+    
+            return response()->json([
+                'status'   => 200,
+                'message'  => 'Product Created Successfully !'
+            ]);
+        } catch(\Exception $e) {
+            return response()->json([
+                'status'   => 500,
+                'message'  => $e
+            ]);
+        }
+    }
+
+    public function getById($id)
+    {
+        $product = Product::where('id', $id)->first();
+
+        if(!$product) {
+            return response()->json([
+                'status'   => 404,
+                'message'  => 'No Data Found !'
+            ]);    
+        }
 
         return response()->json([
-            'message' => 'Congratulations !'
+            'status'   => 200,
+            'data'     => $product
         ]);
     }
 
-    public function update()
+    public function update(Request $request, $id)
     {
-        return response()->json([
-            'message' => 'Congratulations !'
+        $validate = Validator::make($request->all(), [
+            'name'        => 'required',
+            'description' => 'required',
+            'stock'       => 'required',
+            'status'      => 'required'
         ]);
+
+        if($validate->fails()) {
+           return response()->json([
+            'status' => 400,
+            'errors' => $validate->errors()
+           ]);
+        }
+
+        try {
+            $prd_img = '';
+            if($request->hasFile('prd_img')) {
+               $prd_img = $this->handleFile($request->prd_img);
+            }
+
+            Product::where('id', $id)->update([
+                'name'        => $request->name,
+                'description' => $request->description,
+                'prd_img'     => $prd_img,
+                'cat'         => $request->cat,
+                'stock'       => $request->stock,
+                'status'      => $request->status
+            ]);
+    
+            return response()->json([
+                'status'   => 200,
+                'message'  => 'Product Updated Successfully !'
+            ]);
+        } catch(\Exception $e) {
+            return response()->json([
+                'status'   => 500,
+                'message'  => $e
+            ]);
+        }
     }
 
-    public function delete()
+    public function delete($id)
     {
+        $product = Product::find($id);
+
+        if(!$product) {
+            return response()->json([
+                'status'   => 404,
+                'message'  => 'No Data Found !'
+            ]);    
+        }
+
+        $product->delete();
+
         return response()->json([
-            'message' => 'Congratulations !'
+            'status'   => 200,
+            'message'  => 'Data Deleted Successfully !'
         ]);
     }
 
