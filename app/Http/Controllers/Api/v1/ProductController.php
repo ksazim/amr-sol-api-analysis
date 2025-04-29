@@ -110,12 +110,15 @@ class ProductController extends Controller
         }
 
         try {
-            $prd_img = '';
-            if($request->hasFile('prd_img')) {
-               $prd_img = $this->handleFile($request->prd_img);
+            $product = Product::findOrFail($id); // Get existing product or fail
+
+            $prd_img = $product->prd_img; // default to old image
+
+            if ($request->hasFile('prd_img')) {
+                $prd_img = $this->handleFile($request->file('prd_img'));
             }
 
-            Product::where('id', $id)->update([
+            $product->update([
                 'name'        => $request->name,
                 'description' => $request->description,
                 'prd_img'     => $prd_img,
@@ -123,10 +126,10 @@ class ProductController extends Controller
                 'stock'       => $request->stock,
                 'status'      => $request->status
             ]);
-    
+
             return response()->json([
-                'status'   => 200,
-                'message'  => 'Product Updated Successfully !'
+                'status'  => 200,
+                'message' => 'Product Updated Successfully!'
             ]);
         } catch(\Exception $e) {
             return response()->json([
@@ -164,7 +167,7 @@ class ProductController extends Controller
     {
         $extension = $file->getClientOriginalExtension();
         $fileName = time() . '.' . $extension;
-        $path = $file->storeAs('about', $fileName, 'private'); // Use 'local' if 'private' is not configured
-        return $fileName;
+        $path = $file->storeAs('about', $fileName, 'private'); 
+        return $path;
     }
 }
