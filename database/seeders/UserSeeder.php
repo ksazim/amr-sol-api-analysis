@@ -6,14 +6,26 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $permissions = [
+            'create product',
+            'edit product',
+            'delete product',
+            'view product',
+            'list product',
+        ];
+
+        // Create permissions
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
         // Create roles if they don't exist
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $userRole  = Role::firstOrCreate(['name' => 'user']);
@@ -26,5 +38,9 @@ class UserSeeder extends Seeder
         // Assign roles
         $users[0]->assignRole('admin');
         $users[1]->assignRole('user');
+
+        // Assign permissions
+        $adminRole->givePermissionTo(Permission::all());
+        $userRole->givePermissionTo(['view product']);
     }
 }

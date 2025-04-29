@@ -6,13 +6,25 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+use App\Models\Product;
+use App\Models\ProductPrice;
+
 class ProductController extends Controller
 {
     public function list()
     {
-        return response()->json([
-            'message' => 'Congratulations !'
-        ]);
+        try {
+            $list = Product::with('prices')->paginate(10);
+            return response()->json([
+                'list' => $list,
+                'status' => 200,
+            ]);
+        } catch(\Exception $e) {
+            return response()->json([
+                'message' => 'Server Error !',
+                'status' => 500,
+            ]);
+        }
     }
 
     public function craete()
@@ -22,6 +34,8 @@ class ProductController extends Controller
         if($request->hasFile('photo')) {
             $productImage = $this->handleFile($request->photo);
         }
+
+
 
         return response()->json([
             'message' => 'Congratulations !'

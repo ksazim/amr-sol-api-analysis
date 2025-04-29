@@ -21,16 +21,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Route::middleware(['permission:publish articles'])->get('test', [AuthController::class, 'test']);
-// Route::get('test', [AuthController::class, 'test']);
-
 // Authentication
 
 Route::post('/v1/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/v1/logout', [AuthController::class, 'logout']);
 
 // Product 
-Route::middleware(['permission:publish articles'])->get('list', [ProductController::class, 'list']);
-Route::middleware(['permission:publish articles'])->get('create', [ProductController::class, 'create']);
-Route::middleware(['permission:publish articles'])->get('update', [ProductController::class, 'update']);
-Route::middleware(['permission:publish articles'])->get('delete', [ProductController::class, 'delete']);
+Route::middleware(['auth:sanctum', 'permission:list product'])->get('v1/list', [ProductController::class, 'list']);
+Route::middleware(['auth:sanctum', 'permission:list create'])->get('v1/create', [ProductController::class, 'create']);
+Route::middleware(['auth:sanctum', 'permission:list edit'])->get('v1/update', [ProductController::class, 'update']);
+Route::middleware(['auth:sanctum', 'permission:list delete'])->get('v1/delete', [ProductController::class, 'delete']);
