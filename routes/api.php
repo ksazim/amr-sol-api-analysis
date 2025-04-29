@@ -24,8 +24,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Route::middleware(['permission:publish articles'])->get('test', [AuthController::class, 'test']);
 // Route::get('test', [AuthController::class, 'test']);
 
-Route::post('/v1/login', [AuthController::class, 'login']);
+// Authentication
 
+Route::post('/v1/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/v1/logout', [AuthController::class, 'logout']);
 
+// Product 
 Route::middleware(['permission:publish articles'])->get('list', [ProductController::class, 'list']);
+Route::middleware(['permission:publish articles'])->get('create', [ProductController::class, 'create']);
+Route::middleware(['permission:publish articles'])->get('update', [ProductController::class, 'update']);
+Route::middleware(['permission:publish articles'])->get('delete', [ProductController::class, 'delete']);
